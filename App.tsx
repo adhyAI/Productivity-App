@@ -13,6 +13,7 @@ import { Journal } from './components/Journal';
 import { Settings } from './components/Settings';
 import { Auth } from './components/Auth';
 import { LifeBalance } from './components/LifeBalance';
+import { CalendarView } from './components/CalendarView';
 import { Button } from './components/ui/button';
 import { Avatar, AvatarFallback } from './components/ui/avatar';
 import { 
@@ -31,7 +32,8 @@ import {
   Settings2,
   LogOut,
   User,
-  Compass
+  Compass,
+  CalendarDays
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -125,7 +127,8 @@ export default function App() {
     { id: 'journal', label: 'Journal', icon: BookOpen },
     { id: 'habits', label: 'Habits', icon: Target },
     { id: 'timer', label: 'Timer', icon: Clock },
-    { id: 'goals', label: 'Goals', icon: TrendingUp }
+    { id: 'goals', label: 'Goals', icon: TrendingUp },
+    { id: 'calendar', label: 'Calendar', icon: CalendarDays }
   ];
 
   const secondaryNavigationItems = [
@@ -161,6 +164,8 @@ export default function App() {
         return <Journal />;
       case 'life-balance':
         return <LifeBalance />;
+      case 'calendar':
+        return <CalendarView setActiveTab={setActiveTab} />;
       case 'settings':
         return <Settings />;
       default:

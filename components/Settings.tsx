@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Integrations } from './Integrations';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -248,12 +249,13 @@ export function Settings() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="appearance" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="appearance">Appearance</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
               <TabsTrigger value="preferences">Preferences</TabsTrigger>
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="data">Data</TabsTrigger>
+              <TabsTrigger value="integrations">Integrations</TabsTrigger>
             </TabsList>
 
             {/* Appearance Settings */}
@@ -654,6 +656,10 @@ export function Settings() {
                   </Button>
                 </CardContent>
               </Card>
+            </TabsContent>
+            {/* Integrations */}
+            <TabsContent value="integrations" className="space-y-6">
+              <Integrations />
             </TabsContent>
           </Tabs>
         </CardContent>

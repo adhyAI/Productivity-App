@@ -6,19 +6,20 @@ import { Label } from './ui/label';
 import { Separator } from './ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Checkbox } from './ui/checkbox';
-import { 
-  LogIn, 
-  UserPlus, 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Lock, 
-  User, 
+import {
+  LogIn,
+  UserPlus,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
   ArrowRight,
   Shield,
   Github,
   Chrome
 } from 'lucide-react';
+import { signInWithGoogle, getClientId, saveClientId, getStoredUserInfo } from '../lib/google';
 
 interface AuthProps {
   onLogin: (user: { email: string; name: string }) => void;
@@ -29,6 +30,11 @@ export function Auth({ onLogin }: AuthProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+
+  // Google OAuth state
+  const [showClientIdPrompt, setShowClientIdPrompt] = useState(false);
+  const [clientIdInput, setClientIdInput] = useState('');
+  const [googleError, setGoogleError] = useState<string | null>(null);
 
   // Login form state
   const [loginData, setLoginData] = useState({
@@ -123,24 +129,47 @@ export function Auth({ onLogin }: AuthProps) {
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'github') => {
+  const handleSocialLogin = async (provider: 'github') => {
     setIsLoading(true);
-    
     try {
-      // Simulate OAuth flow
+      // Simulate OAuth flow for GitHub (mock)
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const user = {
-        email: `user@${provider}.com`,
-        name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`
-      };
-      
-      onLogin(user);
+      onLogin({ email: `user@${provider}.com`, name: 'GitHub User' });
     } catch (error) {
       console.error(`${provider} login failed:`, error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = async (overrideClientId?: string) => {
+    const clientId = overrideClientId ?? getClientId();
+    if (!clientId) {
+      setShowClientIdPrompt(true);
+      return;
+    }
+    setIsLoading(true);
+    setGoogleError(null);
+    try {
+      await signInWithGoogle(clientId);
+      const info = getStoredUserInfo();
+      onLogin({
+        email: info?.email ?? 'user@google.com',
+        name: info?.name ?? 'Google User',
+      });
+    } catch (e) {
+      setGoogleError(e instanceof Error ? e.message : 'Google sign-in failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClientIdSubmit = () => {
+    const trimmed = clientIdInput.trim();
+    if (!trimmed) return;
+    saveClientId(trimmed);
+    setShowClientIdPrompt(false);
+    handleGoogleLogin(trimmed);
   };
 
   if (showForgotPassword) {
@@ -444,7 +473,7 @@ export function Auth({ onLogin }: AuthProps) {
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => handleSocialLogin('google')}
+                  onClick={() => handleGoogleLogin()}
                   disabled={isLoading}
                   className="flex items-center justify-center gap-2"
                 >
@@ -461,6 +490,56 @@ export function Auth({ onLogin }: AuthProps) {
                   GitHub
                 </Button>
               </div>
+
+              {/* Inline Client ID prompt — shown when no Client ID is saved */}
+              {showClientIdPrompt && (
+                <div className="mt-4 p-4 border rounded-lg bg-muted/50 space-y-3">
+                  <p className="text-sm font-medium">Enter your Google OAuth Client ID</p>
+                  <p className="text-xs text-muted-foreground">
+                    Get it from{' '}
+                    <a
+                      href="https://console.cloud.google.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      Google Cloud Console
+                    </a>
+                    {' '}→ APIs &amp; Services → Credentials → OAuth 2.0 Client ID
+                  </p>
+                  <Input
+                    placeholder="xxxxxx.apps.googleusercontent.com"
+                    value={clientIdInput}
+                    onChange={e => setClientIdInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleClientIdSubmit()}
+                    className="font-mono text-sm"
+                  />
+                  {googleError && (
+                    <p className="text-xs text-destructive">{googleError}</p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleClientIdSubmit}
+                      disabled={!clientIdInput.trim() || isLoading}
+                    >
+                      {isLoading ? 'Connecting...' : 'Connect & Sign In'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setShowClientIdPrompt(false); setGoogleError(null); }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Error shown after a failed OAuth attempt (no prompt open) */}
+              {googleError && !showClientIdPrompt && (
+                <p className="mt-2 text-xs text-destructive text-center">{googleError}</p>
+              )}
             </div>
           </CardContent>
         </Card>

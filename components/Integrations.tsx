@@ -5,7 +5,6 @@ import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import {
-  signInWithGoogle,
   signOutGoogle,
   getStoredToken,
   getStoredUserInfo,
@@ -15,7 +14,7 @@ import {
 } from '../lib/google';
 import {
   Calendar, Mail, HardDrive, CheckCircle2, XCircle,
-  ExternalLink, Loader2, Key, ChevronDown, ChevronUp, Info
+  ExternalLink, Key, ChevronDown, ChevronUp, Info
 } from 'lucide-react';
 
 const SERVICE_CONFIG = [
@@ -50,8 +49,6 @@ export function Integrations() {
   const [savedClientId, setSavedClientId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [userInfo, setUserInfo] = useState<GoogleUserInfo | null>(null);
-  const [connecting, setConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
@@ -70,21 +67,6 @@ export function Integrations() {
     saveClientId(trimmed);
     setSavedClientId(trimmed);
     setError(null);
-  };
-
-  const handleConnect = async () => {
-    if (!savedClientId) { setError('Please save your Client ID first.'); return; }
-    setConnecting(true);
-    setError(null);
-    try {
-      await signInWithGoogle(savedClientId);
-      setToken(getStoredToken());
-      setUserInfo(getStoredUserInfo());
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Connection failed');
-    } finally {
-      setConnecting(false);
-    }
   };
 
   const handleDisconnect = () => {
@@ -205,25 +187,12 @@ export function Integrations() {
               </Button>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
-              <div className="flex items-center gap-3">
-                <XCircle className="h-5 w-5 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Not connected</p>
-              </div>
-              <Button
-                onClick={handleConnect}
-                disabled={connecting || !savedClientId}
-                className="flex items-center gap-2"
-              >
-                {connecting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {connecting ? 'Connecting...' : 'Connect Google'}
-              </Button>
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
+              <XCircle className="h-5 w-5 text-muted-foreground shrink-0" />
+              <p className="text-sm text-muted-foreground">
+                Not connected — use <strong>Sign in with Google</strong> on the login page to connect.
+              </p>
             </div>
-          )}
-          {error && (
-            <p className="text-sm text-destructive flex items-center gap-1">
-              <XCircle className="h-4 w-4" /> {error}
-            </p>
           )}
         </CardContent>
       </Card>

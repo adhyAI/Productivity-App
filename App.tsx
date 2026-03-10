@@ -12,15 +12,16 @@ import { Projects } from './components/Projects';
 import { Journal } from './components/Journal';
 import { Settings } from './components/Settings';
 import { Auth } from './components/Auth';
+import { LifeBalance } from './components/LifeBalance';
 import { Button } from './components/ui/button';
 import { Avatar, AvatarFallback } from './components/ui/avatar';
 import { 
-  Home, 
-  CheckSquare, 
-  FileText, 
-  Target, 
-  Clock, 
-  TrendingUp, 
+  Home,
+  CheckSquare,
+  FileText,
+  Target,
+  Clock,
+  TrendingUp,
   BarChart3,
   Calculator,
   DollarSign,
@@ -29,7 +30,8 @@ import {
   MoreHorizontal,
   Settings2,
   LogOut,
-  User
+  User,
+  Compass
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -129,7 +131,8 @@ export default function App() {
   const secondaryNavigationItems = [
     { id: 'budget', label: 'Budget', icon: DollarSign },
     { id: 'tools', label: 'Tools', icon: Calculator },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'life-balance', label: 'Life Balance', icon: Compass }
   ];
 
   const renderContent = () => {
@@ -156,6 +159,8 @@ export default function App() {
         return <Projects />;
       case 'journal':
         return <Journal />;
+      case 'life-balance':
+        return <LifeBalance />;
       case 'settings':
         return <Settings />;
       default:
